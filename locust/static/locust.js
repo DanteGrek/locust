@@ -45,6 +45,8 @@ $("ul.tabs").tabs("div.panes > div").on("onClick", function(event) {
         responseTimeChart.resize();
         errorCountChart.resize();
         usersChart.resize();
+        cpuChart.resize();
+        memoryChart.resize();
     }
 });
 
@@ -120,9 +122,11 @@ $(".stats_label").click(function(event) {
 
 // init charts
 var rpsChart = new LocustLineChart($(".charts-container"), "Total Requests per Second", ["RPS"], "reqs/s");
-var responseTimeChart = new LocustLineChart($(".charts-container"), "Response Times", ["Median Response Time", "95% percentile"], "ms");
+var responseTimeChart = new LocustLineChart($(".charts-container"), "Response Times", ["Median Response Time"], "ms");
 var errorCountChart = new LocustLineChart($(".charts-container"), "Error Count", ["Error Count"], "errors");
 var usersChart = new LocustLineChart($(".charts-container"), "Number of Users", ["Users"], "users");
+var cpuChart = new LocustLineChart($(".charts-container"), "CPU usage", ["CPU"], "%");
+var memoryChart = new LocustLineChart($(".charts-container"), "RAM usage", ["RAM"], "%");
 
 function updateStats() {
     $.get('/stats/requests', function (data) {
@@ -157,13 +161,20 @@ function updateStats() {
             var total = report.stats[report.stats.length-1];
             // update charts
             rpsChart.addValue([total.current_rps]);
-            responseTimeChart.addValue([report.current_response_time_percentile_50, report.current_response_time_percentile_95]);
+            responseTimeChart.addValue([report.current_response_time_percentile_50]);
             errorCountChart.addValue([total.num_failures]);
             usersChart.addValue([report.user_count]);
+            cpuChart.addValue([report.cpu]);
+            memoryChart.addValue([report.memory]);
         }
 
         setTimeout(updateStats, 2000);
     });
+
+    $.get('/stats/requests', function (data) {
+        report = JSON.parse(data);
+    }
+
 }
 updateStats();
 
