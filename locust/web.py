@@ -30,9 +30,6 @@ app.root_path = os.path.dirname(os.path.abspath(__file__))
 
 process_monitor = ProcessMonitorClient()
 
-
-
-
 @app.route('/')
 def index():
     is_distributed = isinstance(runners.locust_runner, MasterLocustRunner)
@@ -59,7 +56,7 @@ def index():
 @app.route('/swarm', methods=["POST"])
 def swarm():
     assert request.method == "POST"
-
+    process_monitor.connect_to_agent()
     locust_count = int(request.form["locust_count"])
     hatch_rate = float(request.form["hatch_rate"])
     runners.locust_runner.start_hatching(locust_count, hatch_rate)
@@ -72,6 +69,7 @@ def stop():
     runners.locust_runner.stop()
     response = make_response(json.dumps({'success':True, 'message': 'Test stopped'}))
     response.headers["Content-type"] = "application/json"
+    process_monitor.close_connection()
     return response
 
 @app.route("/stats/reset")
