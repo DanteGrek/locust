@@ -164,16 +164,15 @@ function updateStats() {
             responseTimeChart.addValue([report.current_response_time_percentile_50]);
             errorCountChart.addValue([total.num_failures]);
             usersChart.addValue([report.user_count]);
-            cpuChart.addValue([report.cpu]);
-            memoryChart.addValue([report.memory]);
         }
 
         setTimeout(updateStats, 2000);
     });
-
-    $.get('/stats/requests', function (data) {
-        report = JSON.parse(data);
-    }
+    $.get('/remote_stats', function (data) {
+        remote_charts = JSON.parse(data);
+        cpuChart.addValue([remote_charts.cpu]);
+        memoryChart.addValue([remote_charts.memory]);
+    });
 
 }
 updateStats();

@@ -14,7 +14,7 @@ from gevent import pywsgi
 
 from locust import __version__ as version
 from six.moves import StringIO, xrange
-
+from process_monitor_client import ProcessMonitorClient
 from . import runners
 from .runners import MasterLocustRunner
 from .stats import distribution_csv, median_from_dict, requests_csv, sort_stats
@@ -27,6 +27,10 @@ DEFAULT_CACHE_TIME = 2.0
 app = Flask(__name__)
 app.debug = True
 app.root_path = os.path.dirname(os.path.abspath(__file__))
+
+process_monitor = ProcessMonitorClient()
+
+
 
 
 @app.route('/')
@@ -92,6 +96,10 @@ def distribution_stats_csv():
     response.headers["Content-type"] = "text/csv"
     response.headers["Content-disposition"] = disposition
     return response
+
+@app.route("/remote_stats")
+def remote_stats():
+    return json.dumps(process_monitor.get_carts())
 
 @app.route('/stats/requests')
 @memoize(timeout=DEFAULT_CACHE_TIME, dynamic_timeout=True)
